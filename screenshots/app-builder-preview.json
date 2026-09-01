@@ -1,0 +1,38 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "sats-price",
+      "hasCanvas": false,
+      "bodyTextLen": 250,
+      "bodyTextHash": "2e680aea1871e62070d7cf82af723332afcdccc52699106abc491e322f73bc69",
+      "bodyTextPrefix": "sats-price how many sats a dollar buys. updated 15s ago 1,296 sa",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "sats-price",
+      "hasCanvas": false,
+      "bodyTextLen": 250,
+      "bodyTextHash": "f0536c7844aeb5a99ac1bd0b4143ca9fbb2e4940cb1dfb212c425d25091303b4",
+      "bodyTextPrefix": "sats-price how many sats a dollar buys. updated 17s ago 1,296 sa",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [
+    "BRAND NOTE: no custom public/og.jpg — the platform will serve the og.grok.me placeholder. Custom cards are the default for games of every kind (DOM board/word games included), whimsical apps, creative tools, and brand-forward pages — only plain utilities (converters, CRUD trackers, admin dashboards) keep the placeholder. If this app is not a plain utility, finish the brand-asset pass per /workspace/.grok/skills/og/SKILL.md."
+  ],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
