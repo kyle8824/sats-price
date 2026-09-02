@@ -21,7 +21,7 @@ export const Route = createRootRoute({
         content:
           "how many sats a dollar buys. Live sats per US dollar, plus a dollars to sats converter.",
       },
-      { name: "theme-color", content: "#f4f5f7" },
+      { name: "theme-color", content: "#07090d" },
     ],
     links: [
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },

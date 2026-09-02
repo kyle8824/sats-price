@@ -12,6 +12,7 @@ import {
   formatAgo,
   formatPlainSats,
   formatPlainUsd,
+  formatBits,
   formatSats,
   formatUsd,
   parseAmount,
@@ -27,38 +28,25 @@ export const Route = createFileRoute("/")({
 function Home() {
   const initial = Route.useLoaderData();
   const price = useLivePrice(initial);
-  const live = price.ok && !price.stale;
-  const updated = formatAgo(
-    price.lastUpdatedAt ?? price.fetchedAt,
-    price.now,
-  );
+  const [side, setSide] = useState<"usd" | "sats">("usd");
+  const [raw, setRaw] = useState("1");
+
+  const parsed = parseAmount(raw);
+  const usdValue =
+    side === "usd"
+      ? parsed
+      : parsed != null && price.usd != null
+        ? satsToDollars(parsed, price.usd)
+        : null;
+  const satsValue =
+    side === "sats"
+      ? parsed
+      : parsed != null && price.usd != null
+        ? dollarsToSats(parsed, price.usd)
+        : null;
 
   return (
     <PageShell>
-      <header className="flex items-end justify-between gap-4 border-b border-border py-3">
-        <div className="min-w-0">
-          <h1 className="text-sm font-medium tracking-tight text-fg">
-            sats-price
-          </h1>
-          <p className="text-sm leading-normal text-muted">
-            how many sats a dollar buys.
-          </p>
-        </div>
-        <p
-          className={
-            live
-              ? "shrink-0 text-sm leading-normal tabular-nums text-muted"
-              : "shrink-0 text-sm leading-normal font-medium tabular-nums text-danger"
-          }
-        >
-          {live
-            ? `updated ${updated}`
-            : price.usd == null
-              ? "no quote"
-              : `stale · ${updated}`}
-        </p>
-      </header>
-
       <StatusBanner
         stale={price.stale}
         ok={price.ok}
@@ -68,16 +56,28 @@ function Home() {
         onRetry={() => void price.refresh()}
       />
 
-      <div className="border-b border-border py-4 sm:py-5">
+      <div className="flex flex-1 flex-col justify-center py-8 sm:py-12">
         <Hero
-          sats={price.satsPerDollar}
-          usd={price.usd}
+          sats={satsValue}
           stale={price.stale}
         />
-      </div>
-
-      <div className="py-4 sm:py-5">
-        <Converter btcUsd={price.usd} disabled={price.usd == null} />
+        <div className="mt-10">
+          <Converter
+            disabled={price.usd == null}
+            side={side}
+            raw={raw}
+            usdValue={usdValue}
+            satsValue={satsValue}
+            onUsd={(value) => {
+              setSide("usd");
+              setRaw(value);
+            }}
+            onSats={(value) => {
+              setSide("sats");
+              setRaw(value);
+            }}
+          />
+        </div>
       </div>
 
       <footer className="border-t border-border py-3 text-sm leading-normal text-muted">
@@ -96,23 +96,11 @@ function Home() {
 
 function PageShell({ children }: { children?: ReactNode }) {
   return (
-    <main className="page-shell mx-auto flex min-h-dvh w-full max-w-4xl flex-col px-4 sm:px-6">
+    <main className="page-shell relative mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 sm:px-8">
       {children ?? (
-        <>
-          <header className="border-b border-border py-3">
-            <h1 className="text-sm font-medium tracking-tight text-fg">
-              sats-price
-            </h1>
-            <p className="text-sm text-muted">how many sats a dollar buys.</p>
-          </header>
-          <div className="border-b border-border py-4">
-            <div className="h-12 w-40 border border-border bg-surface" />
-          </div>
-          <div className="grid grid-cols-1 gap-5 py-4 sm:grid-cols-2">
-            <div className="h-28 border border-border bg-surface" />
-            <div className="h-28 border border-border bg-surface" />
-          </div>
-        </>
+        <div className="flex flex-1 flex-col justify-center py-8">
+          <div className="h-16 w-56 bg-surface/40" />
+        </div>
       )}
     </main>
   );
@@ -167,60 +155,48 @@ function StatusBanner({
 
 function Hero({
   sats,
-  usd,
   stale,
 }: {
   sats: number | null;
-  usd: number | null;
   stale: boolean;
 }) {
   const ready = sats != null && Number.isFinite(sats);
 
   return (
-    <section aria-live="polite" className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-8">
+    <section aria-live="polite" className="text-center">
       <p
         className={
           stale
-            ? "font-mono text-hero font-medium tracking-tight text-danger tabular-nums"
-            : "font-mono text-hero font-medium tracking-tight text-fg tabular-nums"
+            ? "text-hero font-semibold tracking-tight text-danger tabular-nums"
+            : "text-hero font-semibold tracking-tight text-fg tabular-nums"
         }
       >
         {ready ? formatSats(sats) : "—"}
       </p>
-      <div className="sm:pb-1">
-        <p className="text-sm leading-normal text-muted">sats / $1</p>
-        <p className="mt-0.5 font-mono text-sm leading-normal tabular-nums text-muted">
-          {usd != null ? formatUsd(usd) : "—"} BTC-USD
-        </p>
-      </div>
+      <p className="mt-3 text-sm tracking-wide text-muted">
+        sats{ready ? ` (₿${formatBits(sats)} bits)` : ""}
+      </p>
     </section>
   );
 }
 
 function Converter({
-  btcUsd,
   disabled,
+  side,
+  raw,
+  usdValue,
+  satsValue,
+  onUsd,
+  onSats,
 }: {
-  btcUsd: number | null;
   disabled: boolean;
+  side: "usd" | "sats";
+  raw: string;
+  usdValue: number | null;
+  satsValue: number | null;
+  onUsd: (value: string) => void;
+  onSats: (value: string) => void;
 }) {
-  const [side, setSide] = useState<"usd" | "sats">("usd");
-  const [raw, setRaw] = useState("1");
-
-  const parsed = parseAmount(raw);
-  const usdValue =
-    side === "usd"
-      ? parsed
-      : parsed != null && btcUsd != null
-        ? satsToDollars(parsed, btcUsd)
-        : null;
-  const satsValue =
-    side === "sats"
-      ? parsed
-      : parsed != null && btcUsd != null
-        ? dollarsToSats(parsed, btcUsd)
-        : null;
-
   const usdText = side === "usd" ? raw : usdValue == null ? "" : formatPlainUsd(usdValue);
   const satsText =
     side === "sats" ? raw : satsValue == null ? "" : formatPlainSats(satsValue);
@@ -232,14 +208,11 @@ function Converter({
         <div className="min-w-0">
         <Field
           id="usd-amount"
-          label="US dollars"
+          label="USD"
           value={usdText}
           disabled={disabled}
           inputMode="decimal"
-          onChange={(value) => {
-            setSide("usd");
-            setRaw(value);
-          }}
+          onChange={onUsd}
         />
         <ChipRow>
           {USD_CHIPS.map((amount) => (
@@ -249,10 +222,7 @@ function Converter({
               size="chip"
               disabled={disabled}
               data-active={usdValue === amount}
-              onClick={() => {
-                setSide("usd");
-                setRaw(String(amount));
-              }}
+              onClick={() => onUsd(String(amount))}
             >
               {`$${amount}`}
             </Button>
@@ -267,10 +237,7 @@ function Converter({
           value={satsText}
           disabled={disabled}
           inputMode="numeric"
-          onChange={(value) => {
-            setSide("sats");
-            setRaw(value);
-          }}
+          onChange={onSats}
         />
         <ChipRow>
           {SATS_CHIPS.map((amount) => (
@@ -280,10 +247,7 @@ function Converter({
               size="chip"
               disabled={disabled}
               data-active={satsValue === amount}
-              onClick={() => {
-                setSide("sats");
-                setRaw(formatPlainSats(amount));
-              }}
+              onClick={() => onSats(formatPlainSats(amount))}
             >
               {satsChipLabel(amount)}
             </Button>

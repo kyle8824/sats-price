@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #f4f5f7;
-  --color-surface: #ffffff;
-  --color-fg: #111214;
-  --color-muted: #3c4046;
-  --color-border: color-mix(in oklab, var(--color-fg) 16%, transparent);
-  --color-ring: var(--color-fg);
-  --color-danger: #9f1c14;
+  --color-bg: #07090d;
+  --color-surface: #141820;
+  --color-fg: #f3f6fb;
+  --color-muted: #8b93a7;
+  --color-accent: #3b82f6;
+  --color-border: color-mix(in oklab, var(--color-fg) 14%, transparent);
+  --color-ring: var(--color-accent);
+  --color-danger: #ef4444;
   --color-danger-fg: #fff7f6;
 
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
@@ -18,8 +19,8 @@
   --radius-lg: 2px;
   --radius-xl: 2px;
 
-  --text-hero: clamp(2.625rem, 4.2vw + 1.2rem, 4rem);
-  --text-hero--line-height: 0.92;
+  --text-hero: clamp(3.5rem, 8vw + 1rem, 7rem);
+  --text-hero--line-height: 0.88;
 
   --duration-micro: 80ms;
   --duration-quick: 150ms;
@@ -37,6 +38,7 @@
   body {
     min-height: 100dvh;
     background-color: var(--color-bg);
+    background-image: radial-gradient(ellipse 80% 50% at 50% -10%, #1e3a8a55, transparent 55%);
     color: var(--color-fg);
     font-family: var(--font-sans);
   }

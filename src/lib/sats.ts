@@ -63,6 +63,15 @@ function trimTrailingZeros(value: string): string {
   return value.replace(/0+$/, "").replace(/\.$/, "");
 }
 
+export function formatBits(sats: number): string {
+  if (!Number.isFinite(sats)) return "—";
+  const bits = sats / 100;
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(bits);
+}
+
 export function formatPlainSats(value: number): string {
   if (!Number.isFinite(value)) return "";
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(
